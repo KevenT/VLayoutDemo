@@ -1,0 +1,34 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<script type="text/javascript">
+
+function javacalljs(){
+     document.getElementById("content").innerHTML =
+         "<br\>JAVA调用了JS的无参函数";
+}
+
+function javacalljswith(arg){
+     document.getElementById("content").innerHTML =
+         ("<br\>"+arg);
+}
+
+function sum(a,b){
+    return a+b;
+}
+function callAndroid(){
+/*约定的url协议为：js://webview?arg1=111&arg2=222*/
+            document.location = "js://webview?arg1=111&arg2=222";
+
+}
+</script>
+</head>
+<body>
+HTML 内容显示 <br/>
+<h1><div id="content">内容显示</div></h1>
+<br/>
+<input type="button"  value="点击调用java代码" onclick="window.android.javaFunction()" />
+<br/>
+<input type="button"  value="点击调用java代码并传递参数" onclick="callAndroid()"  />
+</body>
+</html>

@@ -41,8 +41,14 @@ import com.why.project.vlayoutdemo.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
-public class X5WebActivity extends AppCompatActivity {
+/**
+ * Js回调android的第二种方法。 通过 WebViewClient 的 shouldOverrideUrlLoading ()方法回调拦截 url
+ */
+public class X5WebActivityJCA2 extends AppCompatActivity {
 
     /**
      * 作为一个浏览器的示例展示出来，采用android+web的模式
@@ -92,9 +98,9 @@ public class X5WebActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             try {
-                String urlString  =intent.getData().toString();
-                if (urlString!=null && !urlString.startsWith("file"))
-                findViewById(R.id.ll).setVisibility(View.GONE);
+                String urlString = intent.getData().toString();
+                if (urlString != null && !urlString.startsWith("file"))
+                    findViewById(R.id.ll).setVisibility(View.GONE);
 
 
                 mIntentUrl = new URL(intent.getData().toString());
@@ -107,7 +113,7 @@ public class X5WebActivity extends AppCompatActivity {
         }
         //
         try {
-            if (Integer.parseInt(android.os.Build.VERSION.SDK) >= 11) {
+            if (Integer.parseInt(Build.VERSION.SDK) >= 11) {
                 getWindow()
                         .setFlags(
                                 android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
@@ -128,21 +134,17 @@ public class X5WebActivity extends AppCompatActivity {
         mTestHandler.sendEmptyMessageDelayed(MSG_INIT_UI, 10);
 
 
-
-
-
-
     }
 
 
-    public  class  JsInteration{
+    public class JsInteration {
 
         @JavascriptInterface
         public void javaFunction() {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(X5WebActivity.this, "show", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(X5WebActivityJCA2.this, "show", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -153,14 +155,13 @@ public class X5WebActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(X5WebActivity.this, text, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(X5WebActivityJCA2.this, text, Toast.LENGTH_SHORT).show();
 //                    finish();
                 }
             });
         }
 
     }
-
 
 
     private void changGoForwardButton(WebView view) {
@@ -189,6 +190,17 @@ public class X5WebActivity extends AppCompatActivity {
         mPageLoadingProgressBar.setMax(100);
         mPageLoadingProgressBar.setProgressDrawable(this.getResources()
                 .getDrawable(R.drawable.color_progressbar));
+    }
+
+
+    public void javaFunction2(final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(X5WebActivityJCA2.this, text, Toast.LENGTH_SHORT).show();
+//                    finish();
+            }
+        });
     }
 
     private void init() {
@@ -225,7 +237,7 @@ public class X5WebActivity extends AppCompatActivity {
                 mWebView.evaluateJavascript("sum(1,2)", new com.tencent.smtt.sdk.ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
-                        Toast.makeText(X5WebActivity.this,value,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(X5WebActivityJCA2.this, value, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -234,7 +246,42 @@ public class X5WebActivity extends AppCompatActivity {
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return false;
+                // 步骤2：根据协议的参数，判断是否是所需要的url
+                // 一般根据scheme（协议格式） & authority（协议名）判断（前两个参数）
+                //假定传入进来的 url = "js://webview?arg1=111&arg2=222"（同时也是约定好的需要拦截的）
+
+                Uri uri = Uri.parse(url);
+                // 如果url的协议 = 预先约定的 js 协议
+                // 就解析往下解析参数
+                if (uri.getScheme().equals("js")) {
+
+                    // 如果 authority  = 预先约定协议里的 webview，即代表都符合约定的协议
+                    // 所以拦截url,下面JS开始调用Android需要的方法
+                    if (uri.getAuthority().equals("webview")) {
+
+                        //  步骤3：
+                        // 执行JS所需要调用的逻辑
+                        System.out.println("js调用了Android的方法");
+                        // 可以在协议上带有参数并传递到Android上
+                        HashMap<String, String> params = new HashMap<>();
+                        Set<String> collection = uri.getQueryParameterNames();
+                        for (Iterator iterator = collection.iterator(); iterator.hasNext(); ) {
+                            String name = (String) iterator.next();
+                            String value = uri.getQueryParameter(name);
+                            params.put(name, value);
+                            System.out.println("===collection====" + name + "  " + value);
+                        }
+
+                        if ("111".equals(params.get("arg1"))){
+                            javaFunction2("I`m here");
+                        }
+
+
+                    }
+
+                    return true;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
             }
 
             @Override
@@ -242,7 +289,7 @@ public class X5WebActivity extends AppCompatActivity {
                 super.onPageFinished(view, url);
                 // mTestHandler.sendEmptyMessage(MSG_OPEN_TEST_URL);
                 mTestHandler.sendEmptyMessageDelayed(MSG_OPEN_TEST_URL, 5000);// 5s?
-                if (Integer.parseInt(android.os.Build.VERSION.SDK) >= 16)
+                if (Integer.parseInt(Build.VERSION.SDK) >= 16)
                     changGoForwardButton(view);
                 /* mWebView.showLog("test Log"); */
             }
@@ -262,6 +309,7 @@ public class X5WebActivity extends AppCompatActivity {
 
             // /////////////////////////////////////////////////////////
             //
+
             /**
              * 全屏播放配置
              */
@@ -306,7 +354,7 @@ public class X5WebActivity extends AppCompatActivity {
             public void onDownloadStart(String arg0, String arg1, String arg2,
                                         String arg3, long arg4) {
                 TbsLog.d(TAG, "url: " + arg0);
-                new AlertDialog.Builder(X5WebActivity.this)
+                new AlertDialog.Builder(X5WebActivityJCA2.this)
                         .setTitle("allow to download？")
                         .setPositiveButton("yes",
                                 new DialogInterface.OnClickListener() {
@@ -314,7 +362,7 @@ public class X5WebActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog,
                                                         int which) {
                                         Toast.makeText(
-                                                X5WebActivity.this,
+                                                X5WebActivityJCA2.this,
                                                 "fake message: i'll download...",
                                                 Toast.LENGTH_LONG).show();
                                     }
@@ -327,7 +375,7 @@ public class X5WebActivity extends AppCompatActivity {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         Toast.makeText(
-                                                X5WebActivity.this,
+                                                X5WebActivityJCA2.this,
                                                 "fake message: refuse download...",
                                                 Toast.LENGTH_SHORT).show();
                                     }
@@ -339,7 +387,7 @@ public class X5WebActivity extends AppCompatActivity {
                                     public void onCancel(DialogInterface dialog) {
                                         // TODO Auto-generated method stub
                                         Toast.makeText(
-                                                X5WebActivity.this,
+                                                X5WebActivityJCA2.this,
                                                 "fake message: refuse download...",
                                                 Toast.LENGTH_SHORT).show();
                                     }
@@ -389,7 +437,7 @@ public class X5WebActivity extends AppCompatActivity {
         mGo = (Button) findViewById(R.id.btnGo1);
         mUrl = (EditText) findViewById(R.id.editUrl1);
         mMore = (ImageButton) findViewById(R.id.btnMore);
-        if (Integer.parseInt(android.os.Build.VERSION.SDK) >= 16) {
+        if (Integer.parseInt(Build.VERSION.SDK) >= 16) {
             mBack.setAlpha(disable);
             mForward.setAlpha(disable);
             mHome.setAlpha(disable);
@@ -428,7 +476,7 @@ public class X5WebActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(X5WebActivity.this, "not completed",
+                Toast.makeText(X5WebActivityJCA2.this, "not completed",
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -517,8 +565,8 @@ public class X5WebActivity extends AppCompatActivity {
         });
     }
 
-    boolean[] m_selected = new boolean[] { true, true, true, true, false,
-            false, true };
+    boolean[] m_selected = new boolean[]{true, true, true, true, false,
+            false, true};
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -526,7 +574,7 @@ public class X5WebActivity extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (mWebView != null && mWebView.canGoBack()) {
                 mWebView.goBack();
-                if (Integer.parseInt(android.os.Build.VERSION.SDK) >= 16)
+                if (Integer.parseInt(Build.VERSION.SDK) >= 16)
                     changGoForwardButton(mWebView);
                 return true;
             } else

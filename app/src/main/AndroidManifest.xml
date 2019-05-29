@@ -25,6 +25,7 @@
         <activity android:name="com.why.project.webview_demo.WebActivity" />
         <activity android:name="com.why.project.hybriddemo.H5WebActivity" />
         <activity android:name="com.why.project.hybriddemo.X5WebActivity" />
+        <activity android:name="com.why.project.hybriddemo.X5WebActivityJCA2"/>
     </application>
 
 </manifest>

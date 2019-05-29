@@ -17,6 +17,7 @@ import com.alibaba.android.vlayout.layout.SingleLayoutHelper;
 import com.alibaba.android.vlayout.layout.StickyLayoutHelper;
 import com.why.project.hybriddemo.H5WebActivity;
 import com.why.project.hybriddemo.X5WebActivity;
+import com.why.project.hybriddemo.X5WebActivityJCA2;
 import com.why.project.vlayoutdemo.adapter.BannerLayoutAdapter;
 import com.why.project.vlayoutdemo.adapter.GridLayoutAdapter;
 import com.why.project.vlayoutdemo.adapter.HorizontalListLayoutAdapter;
@@ -168,8 +169,10 @@ public class MainActivity extends AppCompatActivity {
 //							Intent it = new Intent(MainActivity.this, WebActivity.class);
 //							Intent it = new Intent(MainActivity.this, H5WebActivity.class);
 //							it.putExtra("url",itemBean.getUrlPath());
-							Intent it = new Intent(MainActivity.this, X5WebActivity.class);
-//							it.putExtra("url",itemBean.getUrlPath());
+
+//							Intent it = new Intent(MainActivity.this, X5WebActivity.class);
+							//		测试第二种jsCallAndroid的方法
+							Intent it = new Intent(MainActivity.this, X5WebActivityJCA2.class);
 							Uri uri= Uri.parse(itemBean.getUrlPath());
 							it.setData(uri);
 							startActivity(it);
@@ -218,7 +221,9 @@ public class MainActivity extends AppCompatActivity {
 
 	/*=======================================获取测试数据==============================================*/
 	private void getTestDatas(){
-		String listdata = getStringFromAssert(MainActivity.this,"vlayout.txt");
+//		String listdata = getStringFromAssert(MainActivity.this,"vlayout.txt");
+//		测试第二种jsCallAndroid的方法
+		String listdata = getStringFromAssert(MainActivity.this,"vlayout2.txt");
 		try {
 			JSONObject listObj = new JSONObject(listdata);
 			JSONArray listArray = listObj.getJSONArray("data");
